@@ -72,10 +72,10 @@ sudo make install
 ```
 cd ~/snort
 wget https://github.com/snort3/libdaq/archive/refs/tags/v3.0.13.tar.gz
-tar -xzvf libdaq-3.0.13.tar.gz
+tar -xzvf v3.0.13.tar.gz
 cd libdaq-3.0.13
 ./bootstrap
-./configure 
+./configure
 make
 sudo make install
 ```
@@ -101,7 +101,7 @@ sudo make install
 1. Get Network Adapter Name using `ip a`. It would look something like *eno18*
 2. Check to see if GRO and LRO are enabled. If they are both disabled, skip to step 12.
 	`sudo ethtool -k <network adapter name> | grep receive-offload`
-3. Let's create a service to disable these kernels.
+3. Let's create a service to disable these kernels. ens18
 	1. `sudo nano /lib/systemd/system/ethtool.service`
 	2. Paste in the Script at the bottom of this section, replace the network adapter text, and save using `CTRL-X`
 	4. Enable the service using `sudo systemctl enable ethtool.service`
@@ -127,18 +127,18 @@ WantedBy=multi-user.target
 1. Create a directory to store your rules
 	`sudo mkdir /usr/local/etc/rules`
 2. Create a rule file
-	`sudo nano /usr/local/etc/local.rules`
+	`sudo nano /usr/local/etc/rules/local.rules`
 3. Lets create a rule that listens for pings
 	`alert icmp any any -> any any ( msg:"ICMP Detected"; sid:1000001;)`
 4. Save and exit Nano `Ctrl-X` 
 5. Validate rule creation
-	`snort -c /usr/local/etc/snort/snort.lua -R /usr/local/etc/local.rules`
+	`snort -c /usr/local/etc/snort/snort.lua -R /usr/local/etc/rules/local.rules`
 6. Run snort and listen to traffic
-	`snort -c /usr/local/etc/snort/snort.lua -R /usr/local/etc/local.rules -i <network adapter> -A alert_fast`
+	`sudo snort -c /usr/local/etc/snort/snort.lua -R /usr/local/etc/rules/local.rules -i <network adapter> -A alert_fast`
 7. Run ping from another machine and monitor traffic. You should see alerts triggered by this rule. 
 ### Adding Rule File To Default Configuration
 1. Modify the Snort Configuration
-	`/usr/local/etc/snort/snort.lua`
+	`sudo nano /usr/local/etc/snort/snort.lua`
 2. Find the ips field and modify it so that it looks like the following:
 ```
 ips = {
@@ -174,7 +174,7 @@ sudo cp -r lib/ /usr/local/bin/pulledpork3 
 sudo chmod +x /usr/local/bin/pulledpork3/pulledpork.py 
 ```
 2. Test and validate the version: `pulledpork.py -V`
-**Troubleshooting**: If the command is not found. It should be located in `/usr/local/bin/pulledpork/pulledpork.py`
+**Troubleshooting**: If the command is not found. It should be located in `/usr/local/bin/pulledpork3/pulledpork.py`
 3. Modify the Configuration file and import rule-sets
 	1. Open PulledPork Configuration file
 		`sudo nano /usr/local/etc/pulledpork3/pulledpork.conf`
@@ -186,11 +186,11 @@ sudo chmod +x /usr/local/bin/pulledpork3/pulledpork.py 
 		5. Uncomment and Ensure this line is correct.`local_rules = /usr/local/etc/rules/local.rules`. Delete the other placeholder
 	3. Save and exit Nano `Ctrl-X`
 	4. Create a so_rules directory
-		`mkdir /usr/local/etc/so_rules`
-		`mkdir /usr/local/etc/lists`
+		`sudo mkdir /usr/local/etc/so_rules`
+		`sudo mkdir /usr/local/etc/lists`
 	1. There is a typo in the PulledPork3 Python File. 
 		1. Open PulledPork Python file
-		`sudo nano /usr/local/bin/pulledpork/pulledpork.py`
+		`sudo nano /usr/local/bin/pulledpork3/pulledpork.py`
 		2. Modify the following line:
 		`RULESET_URL_SNORT_REGISTERED = 'https://snort.org/rules/snortrules-snapshot-<VERSION>.tar.gz'`
 		to
@@ -234,4 +234,3 @@ unzip 2022-02-23-traffic-analysis-exercise.pcap.zip
 	- What do you see? 
 	- What hosts/user account names are active on this network?
 	- What type of malware are they infected with?
-
